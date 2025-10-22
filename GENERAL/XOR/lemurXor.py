@@ -13,7 +13,7 @@ def xor_images(img1_path, img2_path, output_path):
     img2 = Image.open(img2_path).convert('RGB')
     
     if img1.size != img2.size:
-        raise ValueError('Images must be the same size!')
+        raise ValueError('Images must be the same size')
     
     arr1 = np.array(img1)
     arr2 = np.array(img2)

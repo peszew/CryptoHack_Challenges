@@ -1,30 +1,56 @@
-from binascii import unhexlify
+import binascii
 
-def brute(input, key):
-    if len(input) != len(key):
-        return "Failed!"
+def xor_hex(hex1, hex2):
 
-    output = b''
-    for b1, b2 in zip(input, key):
-        output += bytes([b1 ^ b2])
+    b1 = binascii.unhexlify(hex1)
+    b2 = binascii.unhexlify(hex2)
+    
+    result_bytes = bytes([_a ^ _b for _a, _b in zip(b1, b2)])
+    
+    return binascii.hexlify(result_bytes).decode()
+
+def solve():
+   
+    ciphertext_hex = "0e0b213f26041e480b26217f27342e175d0e070a3c5b183e2526217f27342e175d0e077e263451150104"
+    
+    known_plaintext = "crypto{"
+    
+    known_plaintext_hex = known_plaintext.encode().hex()
+    
+    ciphertext_part_hex = ciphertext_hex[:len(known_plaintext_hex)]
+    
+    print(f"Known Plaintext: {known_plaintext}")
+    print(f"Plaintext Hex:   {known_plaintext_hex}")
+    print(f"Ciphertext Hex:  {ciphertext_part_hex}")
+    print("-" * 30)
+
+    key_part_hex = xor_hex(known_plaintext_hex, ciphertext_part_hex)
+    key_part_ascii = binascii.unhexlify(key_part_hex).decode()
+    
+    print(f"Derived Key Part (Hex):   {key_part_hex}")
+    print(f"Derived Key Part (ASCII): {key_part_ascii}")
+    print("-" * 30)
+    
+    key = "myXORkey"
+    key_bytes = key.encode()
+    key_len = len(key_bytes)
+    
+    print(f"Guessed Full Key: {key}\n")
+    
+    ciphertext_bytes = binascii.unhexlify(ciphertext_hex)
+    plaintext_bytes = bytearray()
+    
+ 
+    for i in range(len(ciphertext_bytes)):
+        key_byte = key_bytes[i % key_len]
+        plain_byte = ciphertext_bytes[i] ^ key_byte
+        plaintext_bytes.append(plain_byte)
+ 
     try:
-        return output.decode("utf-8")
-    except:
-        return "Cannot Decode some bytes"
+        flag = plaintext_bytes.decode('ascii')
+        print(f"Decrypted Flag: {flag}")
+    except UnicodeDecodeError:
+        print(f"Decrypted Bytes (contains non-ASCII): {plaintext_bytes}")
 
-data = "0e0b213f26041e480b26217f27342e175d0e070a3c5b103e2526217f27342e175d0e077e263451150104"
-cipher = unhexlify(data)
-print("[-] CIPHER: {}".format(cipher))
-
-# First Step
-key_part = brute(cipher[:7], "crypto{".encode())
-print("[-] PARTIAL KEY FOUND: {}".format(key_part))
-
-# Second Step
-key = (key_part + "y").encode()
-key += key * int((len(cipher) - len(key))/len(key))
-key += key[:((len(cipher) - len(key))%len(key))]
-print("[-] Decoding using KEY: {}".format(key))
-
-plain = brute(cipher, key)
-print("\n[*] FLAG: {}".format(plain))
+if __name__ == "__main__":
+    solve()
