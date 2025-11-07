@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 from pwn import remote
 import json, base64, codecs
 
@@ -18,18 +18,15 @@ def decode_msg(obj):
     if t == "rot13":
         return codecs.decode(v, "rot_13")
     if t == "bigint":
-        # v is like "0x..."
         n = int(v, 0)
         length = (n.bit_length() + 7) // 8 or 1
         return n.to_bytes(length, "big").decode()
     if t == "utf-8":
-        # v is a list of integers
         return "".join(chr(i) for i in v)
     raise ValueError("unknown type "+t)
 
 r = remote("socket.cryptohack.org", 13377)
 try:
-    # initial receive
     msg = json_recv(r)
     while True:
         print("TYPE:", msg.get("type"))

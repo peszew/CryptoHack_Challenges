@@ -1,2 +1,2 @@
-# CryptoHack_Challenges
-CryptoHack_WriteUps
+# CryptoHackChallenges
+CryptoHackWriteUps
